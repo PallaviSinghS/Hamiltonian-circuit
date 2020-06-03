@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int sol;
+
+void display(int *circuit, int n)
+{
+    sol++;
+    int i;
+    printf("Solution %d is:\t",sol);
+
+    for (i = 0; i < n; i++)
+        printf("%d ",circuit[i]+1);
+
+    printf("1");
+    printf("\n");
+}
+
+
+int circuit_contains(int *circuit,int pos,int j)
+{
+    int i;
+    int contains = 0;
+
+    for (i = 0; i < pos && !contains; i++)
+        contains = circuit[i] == j;
+
+    return contains;
+}
+
+ void hamiltonian_circuits_recursive(int **adjmat,int n,int *circuit,int pos)
+{
+    if (pos == n)
+    {
+        display(circuit, n); /* Found a path */
+    }
+    else
+    {
+        int j;
+        for (j = 1; j < n; j++)
+        {
+            if (!circuit_contains(circuit, pos, j) /* Vertex is not in the circuit already */
+                && adjmat[circuit[ pos - 1]][j] == 1 /* Vertex is adjacent to the previous vertex */
+                && (pos < n - 1 || (adjmat[0][j] == 1 /* Last vertex is adjacent to the first */
+                    && j < circuit[1]))) /* Last vertex is less than the second */
+            {
+                circuit[pos] = j;
+                hamiltonian_circuits_recursive(adjmat, n, circuit, pos + 1);
+            }
+        }
+    }
+}
+
+
+void hamiltonian_circuits(int **adjmat, int n)
+{
+    int *circuit;
+    circuit = malloc(n * sizeof(int));
+
+    circuit[0] = 0;
+    hamiltonian_circuits_recursive(adjmat, n, circuit, 1);
+}
+
+
+int main(void)
+{
+    int **adjmat;
+    int n ;
+    int i, j;
+
+    printf("Enter total number of vertices:");
+    scanf("%d",&n);
+
+    adjmat = malloc(n * sizeof(int *));
+
+    printf("\nEnter adjacency matrix:\n");
+
+    for (i = 0; i < n; i++)
+    {
+        adjmat[i] = malloc(n * sizeof(int));
+
+        for (j = 0; j < n; j++)
+            scanf("%d",&adjmat[i][j]);
+    }
+
+    printf("\n");
+
+    hamiltonian_circuits(adjmat, n);
+
+    if (sol == 0 )
+        printf("No path found\n");
+
+    return 0;
+}
